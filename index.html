@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misi Lorong Waktu: Jejak Pahlawan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a, #4c1d95, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-hover {
+            transition: all 0.2s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .btn-hover:active {
+            transform: translateY(1px);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        /* Custom Scrollbar for story text */
+        .story-text::-webkit-scrollbar {
+            width: 6px;
+        }
+        .story-text::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Game Container -->
+    <div class="game-container w-full max-w-lg rounded-3xl overflow-hidden relative flex flex-col h-[650px] max-h-[90vh]">
+        
+        <!-- Header / Status Bar (Hidden on Start Screen) -->
+        <div id="statusBar" class="hidden bg-black/30 p-4 flex justify-between items-center border-b border-white/10">
+            <div class="flex flex-col">
+                <span class="text-xs text-blue-200 font-bold uppercase tracking-wider">Agen</span>
+                <span id="displayAgentName" class="font-bold text-white text-lg">Pemain</span>
+            </div>
+            <div class="flex gap-4">
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-blue-200 font-bold uppercase">Level</span>
+                    <span id="displayLevel" class="font-bold text-yellow-400 text-lg">1/3</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-blue-200 font-bold uppercase">Lencana</span>
+                    <span class="font-bold text-green-400 text-lg flex items-center gap-1">
+                        ⭐ <span id="displayScore">0</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="gameContent" class="flex-1 p-6 flex flex-col justify-center relative overflow-hidden">
+            
+            <!-- Screen 1: Start Screen -->
+            <div id="screenStart" class="text-center fade-in flex flex-col items-center">
+                <div class="text-6xl mb-4 animate-bounce">⏳🚀</div>
+                <h1 class="text-3xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">Misi Lorong Waktu:</h1>
+                <h2 class="text-xl font-bold mb-6 text-blue-200">Jejak Pahlawan Nusantara</h2>
+                <p class="mb-8 text-sm text-gray-200 bg-black/20 p-4 rounded-xl">
+                    Halo, Agen Masa Depan! Aku Aksa, Game Master-mu. Kita mendapat misi untuk kembali ke masa lalu dan membantu pahlawan nasional kita!
+                </p>
+                <div class="w-full max-w-xs">
+                    <label class="block text-left text-sm font-bold mb-2 text-blue-200">Masukkan Nama Agen Rahasiamu:</label>
+                    <input type="text" id="agentInput" placeholder="Contoh: Agen Garuda" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-6 text-center text-lg font-bold">
+                    <button onclick="startGame()" class="btn-hover w-full bg-gradient-to-r from-green-400 to-green-600 text-white font-bold py-3 px-6 rounded-xl text-lg shadow-lg">
+                        MULAI MISI! 🚀
+                    </button>
+                </div>
+            </div>
+
+            <!-- Screen 2: Story & Question Screen -->
+            <div id="screenLevel" class="hidden fade-in flex-1 flex flex-col h-full">
+                <!-- Story Box -->
+                <div class="bg-black/40 rounded-2xl p-5 mb-4 border border-white/10 flex-1 overflow-y-auto story-text flex flex-col relative">
+                    <div class="flex items-center gap-3 mb-3 border-b border-white/20 pb-3">
+                        <img id="characterImage" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-400 shadow-inner bg-white/10" src="" alt="Hero" onerror="this.src='https://placehold.co/100x100/1e3a8a/FFF?text=Pahlawan'">
+                        <div>
+                            <h3 id="levelTitle" class="font-black text-xl text-yellow-300">Maluku, 1817</h3>
+                            <p id="heroName" class="text-sm text-blue-200 font-bold">Misi: Bantu Kapitan Pattimura</p>
+                        </div>
+                    </div>
+                    <div id="storyText" class="text-gray-100 text-base leading-relaxed flex-1">
+                        <!-- Story goes here -->
+                    </div>
+                </div>
+
+                <!-- Choices -->
+                <div id="choicesContainer" class="flex flex-col gap-3 mt-auto shrink-0">
+                    <!-- Buttons will be generated by JS -->
+                </div>
+            </div>
+
+            <!-- Screen 3: Result Screen (Feedback) -->
+            <div id="screenResult" class="hidden fade-in text-center flex flex-col justify-center items-center h-full">
+                <div id="resultIcon" class="text-7xl mb-4">🎉</div>
+                <h2 id="resultTitle" class="text-3xl font-black mb-2">Hebat!</h2>
+                <div class="bg-black/30 p-5 rounded-2xl border border-white/10 mb-6 max-w-sm">
+                    <p id="resultExplanation" class="text-gray-100 text-sm leading-relaxed">
+                        Penjelasan sejarah di sini.
+                    </p>
+                </div>
+                <p id="rewardText" class="text-yellow-400 font-bold mb-8 text-lg animate-pulse">+10 Lencana Keberanian!</p>
+                <button onclick="nextLevel()" id="nextBtn" class="btn-hover w-full max-w-xs bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold py-3 px-6 rounded-xl text-lg shadow-lg">
+                    LANJUTKAN MISI ➡️
+                </button>
+            </div>
+
+            <!-- Screen 4: End Game Screen -->
+            <div id="screenEnd" class="hidden fade-in text-center flex flex-col justify-center items-center h-full">
+                <div class="text-7xl mb-4">🏆</div>
+                <h2 class="text-3xl font-black mb-2 text-yellow-300">Misi Selesai!</h2>
+                <p class="text-lg mb-6">Kerja bagus, <span id="endAgentName" class="font-bold text-white"></span>!</p>
+                
+                <div class="bg-white/10 p-6 rounded-3xl border border-white/20 mb-8 w-full max-w-sm">
+                    <p class="text-sm text-blue-200 mb-1 uppercase tracking-wider font-bold">Total Lencana Keberanian</p>
+                    <p class="text-5xl font-black text-green-400 mb-4 flex justify-center items-center gap-2">
+                        ⭐ <span id="finalScore">30</span>
+                    </p>
+                    <p id="endMessage" class="text-sm text-gray-200">
+                        Kamu adalah pahlawan masa depan yang hebat karena telah mempelajari sejarah bangsamu!
+                    </p>
+                </div>
+
+                <button onclick="resetGame()" class="btn-hover w-full max-w-xs bg-gradient-to-r from-purple-500 to-purple-700 text-white font-bold py-3 px-6 rounded-xl text-lg shadow-lg">
+                    MAIN LAGI 🔄
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let agentName = "";
+        let score = 0;
+        let currentLevel = 0;
+
+        // Level Data based on prompt
+        const levels = [
+            {
+                year: "Maluku, 1817",
+                hero: "Kapitan Pattimura",
+                image: "https://upload.wikimedia.org/wikipedia/commons/3/36/Kapitan_Pattimura.jpg",
+                story: "<p class='mb-2'>*WUSSSSH!* 🌪️ Mesin waktu mendarat! Wangi rempah tercium. Kita bertemu <b>Kapitan Pattimura</b> yang sedang marah besar.</p><p>Belanda bertindak serakah dengan memonopoli perdagangan rempah-rempah dan menyiksa rakyat. Pattimura bersiap mengobarkan Perang Saparua!</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Menurutmu, mengapa bangsa Eropa sampai rela berlayar jauuuuh ke Nusantara hanya untuk mencari rempah-rempah pada masa itu?</p>",
+                choices: [
+                    "Bahan bangunan benteng",
+                    "Penghangat tubuh & pengawet",
+                    "Bahan bakar kapal laut"
+                ],
+                correctIndex: 1,
+                explanationCorrect: "Tepat sekali! Di Eropa musim dingin sangat beku. Rempah-rempah berguna untuk menghangatkan tubuh dan mengawetkan daging agar tidak cepat busuk.",
+                explanationWrong: "Kurang tepat, Agen! Rempah-rempah bukan untuk bangunan/bahan bakar. Di Eropa, rempah berharga untuk menghangatkan tubuh dan mengawetkan daging."
+            },
+            {
+                year: "Jawa Tengah, 1825",
+                hero: "Pangeran Diponegoro",
+                image: "https://upload.wikimedia.org/wikipedia/commons/4/41/Prince_Diponegoro.jpg",
+                story: "<p class='mb-2'>*ZAAAP!* ⚡ Kita tiba di Tegalrejo. Rakyat sedang sibuk mencabut patok-patok jalan.</p><p>Belanda dengan sengaja memasang patok jalan menembus makam leluhur <b>Pangeran Diponegoro</b>. Ini memicu kemarahan besar!</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Senjata Belanda sangat modern. Taktik cerdik apa yang digunakan Pangeran Diponegoro untuk melawan mereka?</p>",
+                choices: [
+                    "Perang Gerilya (Sembunyi & Serang)",
+                    "Membangun benteng baja",
+                    "Menantang duel di alun-alun"
+                ],
+                correctIndex: 0,
+                explanationCorrect: "Benar! Perang Gerilya adalah taktik sembunyi-sembunyi, menyerang tiba-tiba, lalu mundur cepat ke pegunungan. Ini membuat Belanda kelelahan!",
+                explanationWrong: "Salah, Agen. Senjata kita kalah modern. Pangeran Diponegoro menggunakan taktik <b>Perang Gerilya</b>, yaitu bersembunyi, menyerang tiba-tiba, dan lari!"
+            },
+            {
+                year: "Aceh, 1899",
+                hero: "Cut Nyak Dien",
+                image: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tjoet_Nja_Dien.jpg",
+                story: "<p class='mb-2'>*BRUMMM!* 🚀 Kita berada di hutan Aceh yang lebat. Kita melihat pahlawan wanita yang sangat tangguh, <b>Cut Nyak Dien</b>.</p><p>Meski matanya mulai rabun, beliau menolak menyerah dan terus memimpin pasukan dari dalam hutan melawan Belanda.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Agar tidak mudah dilacak oleh patroli Belanda, siasat apa yang paling tepat saat bersembunyi di hutan?</p>",
+                choices: [
+                    "Membuat api unggun besar",
+                    "Menetap di satu gua selamanya",
+                    "Berpindah-pindah diam-diam"
+                ],
+                correctIndex: 2,
+                explanationCorrect: "Luar Biasa! Taktik berpindah-pindah tempat membuat Cut Nyak Dien sangat sulit ditangkap Belanda selama bertahun-tahun.",
+                explanationWrong: "Wah, berbahaya! Menetap atau membuat api akan mudah dilacak Belanda. Siasat yang benar adalah <b>berpindah-pindah tempat</b> secara diam-diam!"
+            },
+            {
+                year: "Makassar, 1667",
+                hero: "Sultan Hasanuddin",
+                image: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Sultan_Hasanuddin.jpg",
+                story: "<p class='mb-2'>*WUSSH!* 🌊 Kita mendarat di pelabuhan Somba Opu. Ombak bergemuruh! <b>Sultan Hasanuddin</b> sedang memimpin armada laut Gowa melawan kongsi dagang Belanda (VOC).</p><p>Belanda sangat kewalahan dan takut dengan keberanian beliau di lautan.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Karena keberaniannya, julukan apa yang diberikan oleh Belanda kepada Sultan Hasanuddin?</p>",
+                choices: [
+                    "Ayam Jantan dari Timur",
+                    "Harimau Malaya",
+                    "Singa Lautan"
+                ],
+                correctIndex: 0,
+                explanationCorrect: "Betul! Julukan 'De Haantjes van Het Oosten' atau Ayam Jantan dari Timur diberikan Belanda karena beliau sangat gagah berani.",
+                explanationWrong: "Kurang tepat! Karena keberaniannya, Belanda memberinya julukan <b>Ayam Jantan dari Timur</b>."
+            },
+            {
+                year: "Sumatera Barat, 1821",
+                hero: "Tuanku Imam Bonjol",
+                image: "https://upload.wikimedia.org/wikipedia/commons/7/73/Tuanku_Imam_Bonjol.jpg",
+                story: "<p class='mb-2'>*KLIK!* ⏳ Kita mendarat di depan sebuah benteng tanah di Bonjol. <b>Tuanku Imam Bonjol</b> sedang berunding dengan para pemimpin kaum.</p><p>Awalnya terjadi perang saudara, namun akhirnya mereka sadar musuh sesungguhnya adalah Belanda.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Sebelum bersatu melawan Belanda, Kaum Padri yang dipimpin Imam Bonjol berselisih dengan kaum apa?</p>",
+                choices: [
+                    "Kaum Bangsawan",
+                    "Kaum Adat",
+                    "Kaum Pendatang"
+                ],
+                correctIndex: 1,
+                explanationCorrect: "Hebat! Kaum Padri awalnya berselisih dengan Kaum Adat tentang kebiasaan buruk. Namun akhirnya mereka bersatu melawan penjajah Belanda.",
+                explanationWrong: "Salah, Agen. Mereka awalnya berselisih dengan <b>Kaum Adat</b>. Namun akhirnya Kaum Padri dan Kaum Adat bersatu melawan Belanda."
+            },
+            {
+                year: "Banten, 1682",
+                hero: "Sultan Ageng Tirtayasa",
+                image: "https://upload.wikimedia.org/wikipedia/commons/d/de/Sultan_Ageng_Tirtayasa.jpg",
+                story: "<p class='mb-2'>*ZING!* 🚢 Kita berada di Kesultanan Banten yang maju. <b>Sultan Ageng Tirtayasa</b> berhasil menjadikan Banten pelabuhan internasional.</p><p>Belanda (VOC) tidak suka dan menggunakan taktik licik 'adu domba' (Devide et Impera) di dalam istana Banten.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Siapa putra Sultan Ageng yang dihasut oleh Belanda untuk melawan ayahnya sendiri?</p>",
+                choices: [
+                    "Sultan Haji",
+                    "Amangkurat I",
+                    "Pangeran Diponegoro"
+                ],
+                correctIndex: 0,
+                explanationCorrect: "Benar sekali! Belanda sangat licik, mereka menghasut Sultan Haji untuk merebut kekuasaan dari ayahnya sendiri.",
+                explanationWrong: "Kurang tepat. Belanda menghasut <b>Sultan Haji</b>, putra dari Sultan Ageng Tirtayasa, agar terjadi perang saudara."
+            },
+            {
+                year: "Kalimantan Selatan, 1859",
+                hero: "Pangeran Antasari",
+                image: "https://upload.wikimedia.org/wikipedia/commons/7/77/Pangeran_Antasari.jpg",
+                story: "<p class='mb-2'>*WUZZ!* 🛶 Kita tiba di Sungai Barito! <b>Pangeran Antasari</b> sedang memimpin rakyat Banjar menyerang tambang batu bara milik Belanda.</p><p>Beliau bersumpah tidak akan pernah mau berkompromi dengan penjajah sampai titik darah penghabisan!</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Apa semboyan terkenal Pangeran Antasari yang berarti 'pantang menyerah sampai mati'?</p>",
+                choices: [
+                    "Rawe-rawe rantas",
+                    "Merdeka atau Mati",
+                    "Haram Manyarah Waja Sampai Kaputing"
+                ],
+                correctIndex: 2,
+                explanationCorrect: "Benar! 'Haram Manyarah, Waja Sampai Kaputing' artinya haram untuk menyerah, tekad harus sekeras baja dari awal hingga akhir!",
+                explanationWrong: "Bukan itu, Agen. Semboyan khas Pangeran Antasari adalah <b>Haram Manyarah Waja Sampai Kaputing</b>."
+            },
+            {
+                year: "Toba, Sumut, 1878",
+                hero: "Sisingamangaraja XII",
+                image: "https://upload.wikimedia.org/wikipedia/commons/1/18/Sisingamangaraja_XII.jpg",
+                story: "<p class='mb-2'>*BLAR!* 🏔️ Kita berada di wilayah Danau Toba. Raja Batak, <b>Sisingamangaraja XII</b>, sedang menghunuskan pedang pusakanya.</p><p>Beliau memimpin perang selama hampir 30 tahun menentang perluasan wilayah Belanda di tanah Batak.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Apa nama pedang/senjata pusaka milik Sisingamangaraja XII?</p>",
+                choices: [
+                    "Keris Mpu Gandring",
+                    "Piso Gaja Dompak",
+                    "Kujang Pajajaran"
+                ],
+                correctIndex: 1,
+                explanationCorrect: "Wah, ingatanmu tajam! Piso Gaja Dompak adalah pedang pusaka kebanggaan Sisingamangaraja XII.",
+                explanationWrong: "Salah tebak! Senjata pusaka beliau bernama <b>Piso Gaja Dompak</b> (pisau bergagang ukiran gajah)."
+            },
+            {
+                year: "Jepara, 1900",
+                hero: "R.A. Kartini",
+                image: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Raden_Adjeng_Kartini.jpg",
+                story: "<p class='mb-2'>*TING!* 🕯️ Kita berada di sebuah kamar yang terang. <b>R.A. Kartini</b> sedang sibuk menulis surat-surat untuk sahabatnya di Belanda.</p><p>Beliau tidak berjuang mengangkat senjata, tapi berjuang lewat pendidikan agar kaum perempuan tidak direndahkan.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Apa judul buku yang berisi kumpulan surat-surat R.A. Kartini?</p>",
+                choices: [
+                    "Layar Terkembang",
+                    "Habis Gelap Terbitlah Terang",
+                    "Di Bawah Lindungan Ka'bah"
+                ],
+                correctIndex: 1,
+                explanationCorrect: "Betul! 'Habis Gelap Terbitlah Terang' (Door Duisternis tot Licht) adalah buku yang menginspirasi kebangkitan perempuan Indonesia.",
+                explanationWrong: "Bukan itu! Buku kumpulan surat beliau dikumpulkan dengan judul <b>Habis Gelap Terbitlah Terang</b>."
+            },
+            {
+                year: "Yogyakarta, 1922",
+                hero: "Ki Hajar Dewantara",
+                image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Ki_Hadjar_Dewantara_Portrait.jpg",
+                story: "<p class='mb-2'>*ZAP!* 🏫 Kita berada di sebuah sekolah sederhana. <b>Ki Hajar Dewantara</b> sedang mengajar anak-anak rakyat biasa.</p><p>Pada masa itu, Belanda hanya membolehkan anak bangsawan yang sekolah. Beliau mendirikan sekolah Taman Siswa untuk melawan aturan itu.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Salah satu semboyan pendidikan beliau dipakai di logo Kemdikbud kita lho! Yang mana itu?</p>",
+                choices: [
+                    "Tut Wuri Handayani",
+                    "Bhinneka Tunggal Ika",
+                    "Maju Tak Gentar"
+                ],
+                correctIndex: 0,
+                explanationCorrect: "Cerdas! 'Tut Wuri Handayani' artinya dari belakang seorang guru harus bisa memberikan dorongan/motivasi.",
+                explanationWrong: "Kurang tepat. Semboyannya adalah <b>Tut Wuri Handayani</b> yang sekarang ada di topi dan dasi seragam sekolahmu!"
+            },
+            {
+                year: "Aceh, 1893",
+                hero: "Teuku Umar",
+                image: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Teukoe_Oemar.jpg",
+                story: "<p class='mb-2'>*WUSSH!* 🏕️ Kita kembali ke Aceh. Kita melihat <b>Teuku Umar</b> (suami Cut Nyak Dien) sedang membagikan senjata modern kepada pasukannya.</p><p>Beliau punya taktik yang sangat cerdik dan berbahaya untuk mengelabuhi Belanda.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Taktik licik apa yang digunakan Teuku Umar untuk mendapatkan senjata dari Belanda?</p>",
+                choices: [
+                    "Membelinya lewat pasar gelap",
+                    "Mencurinya di malam hari",
+                    "Pura-pura menyerah dan bekerja untuk Belanda"
+                ],
+                correctIndex: 2,
+                explanationCorrect: "Benar sekali! Beliau pura-pura menyerah. Setelah diberi senjata dan uang oleh Belanda, beliau lari kembali ke hutan untuk melawan mereka!",
+                explanationWrong: "Salah tebak! Taktiknya sangat berani: Beliau <b>pura-pura menyerah</b> kepada Belanda, lalu kabur membawa senjata-senjata mereka!"
+            },
+            {
+                year: "Palembang, 1811",
+                hero: "Sultan Mahmud Badaruddin II",
+                image: "https://upload.wikimedia.org/wikipedia/commons/8/87/Sultan_Mahmud_Badaruddin_II.jpg",
+                story: "<p class='mb-2'>*DUARR!* 💥 Kita berada di Sungai Musi! <b>Sultan Mahmud Badaruddin II</b> sedang menembakkan meriam ke kapal Inggris dan Belanda.</p><p>Penjajah silih berganti ingin menguasai Kesultanan Palembang karena kekayaan alamnya yang melimpah.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Kekayaan alam apa yang paling diincar penjajah di wilayah Palembang dan Bangka saat itu?</p>",
+                choices: [
+                    "Tambang Emas",
+                    "Tambang Timah",
+                    "Tambang Mutiara"
+                ],
+                correctIndex: 1,
+                explanationCorrect: "Tepat! Tambang Timah di wilayah Bangka sangat berharga dan diincar oleh Inggris maupun Belanda pada masa itu.",
+                explanationWrong: "Kurang pas, Agen. Penjajah sangat mengincar <b>Tambang Timah</b> yang sangat kaya di wilayah kekuasaan Palembang (Bangka)."
+            },
+            {
+                year: "Maluku, 1817",
+                hero: "Martha Christina Tiahahu",
+                image: "https://upload.wikimedia.org/wikipedia/commons/e/ee/Martha_Christina_Tiahahu.jpg",
+                story: "<p class='mb-2'>*ZAAAP!* 🌴 Kita kembali ke Maluku! Di tengah pertempuran, ada seorang gadis muda mengikat rambutnya dengan kain berani.</p><p>Ia adalah <b>Martha Christina Tiahahu</b>. Ia ikut mengangkat tombak melawan Belanda bersama Kapitan Pattimura!</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Tahukah kamu, berapa perkiraan usia Martha Christina saat berjuang gagah berani di medan perang?</p>",
+                choices: [
+                    "Sekitar 17 Tahun",
+                    "Sekitar 25 Tahun",
+                    "Sekitar 35 Tahun"
+                ],
+                correctIndex: 0,
+                explanationCorrect: "Luar biasa! Di usia yang sangat remaja (17 tahun), ia sudah berani angkat senjata demi membela tanah airnya.",
+                explanationWrong: "Wah usianya jauh lebih muda! Martha Christina berjuang keras saat usianya masih remaja, yaitu <b>sekitar 17 Tahun</b>!"
+            },
+            {
+                year: "Jawa Tengah, 1825",
+                hero: "Nyi Ageng Serang",
+                image: "https://upload.wikimedia.org/wikipedia/commons/8/8c/Nyi_Ageng_Serang.jpg",
+                story: "<p class='mb-2'>*KLIK!* 🌿 Kita berada di tengah semak belukar. Seorang nenek yang gagah berani memimpin pasukan! Ia adalah <b>Nyi Ageng Serang</b>.</p><p>Ia menjadi salah satu penasihat dan panglima perang bagi Pangeran Diponegoro dengan taktik penyamaran yang unik.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Taktik menyamar menggunakan apa yang dipakai pasukan Nyi Ageng Serang agar dikira tanaman oleh musuh?</p>",
+                choices: [
+                    "Daun Kelapa Kering",
+                    "Daun Lumbu (Talas Hijau)",
+                    "Pohon Pisang"
+                ],
+                correctIndex: 1,
+                explanationCorrect: "Benar sekali! Pasukannya menggunakan daun lumbu (talas) untuk menyamar. Belanda sering tertipu mengira mereka adalah kebun talas!",
+                explanationWrong: "Salah tebak! Taktik legendarisnya adalah menggunakan <b>Daun Lumbu (Talas)</b> hijau. Pasukannya bersembunyi di baliknya sehingga dikira kebun."
+            },
+            {
+                year: "Aceh, 1901",
+                hero: "Tjut Meutia",
+                image: "https://upload.wikimedia.org/wikipedia/commons/1/13/Tjut_Meutia.jpg",
+                story: "<p class='mb-2'>*WUSSH!* ⚔️ Kita tiba di hutan Pasai, Aceh. <b>Tjut Meutia</b> memegang rencong dengan sorot mata tajam.</p><p>Setelah suaminya gugur, ia tidak menangis berlama-lama, melainkan langsung mengambil alih komando pasukan untuk menyerang pos-pos Belanda.</p><p class='font-bold text-yellow-300 mt-3'>Pertanyaan Aksa:</p><p>Sama seperti Cut Nyak Dien, senjata tajam tradisional khas Aceh apa yang sering dipakai Tjut Meutia?</p>",
+                choices: [
+                    "Keris",
+                    "Mandau",
+                    "Rencong"
+                ],
+                correctIndex: 2,
+                explanationCorrect: "Tepat! Rencong adalah senjata tradisional khas Aceh yang selalu dibawa oleh para pejuang kemerdekaan di sana.",
+                explanationWrong: "Kurang tepat. Senjata tradisional khas pejuang Aceh adalah <b>Rencong</b>."
+            }
+        ];
+
+        // Elements
+        const elStart = document.getElementById('screenStart');
+        const elLevel = document.getElementById('screenLevel');
+        const elResult = document.getElementById('screenResult');
+        const elEnd = document.getElementById('screenEnd');
+        const elStatusBar = document.getElementById('statusBar');
+
+        function startGame() {
+            const input = document.getElementById('agentInput').value.trim();
+            if (!input) {
+                document.getElementById('agentInput').classList.add('shake');
+                setTimeout(() => document.getElementById('agentInput').classList.remove('shake'), 500);
+                return;
+            }
+            
+            agentName = input;
+            document.getElementById('displayAgentName').textContent = agentName;
+            document.getElementById('endAgentName').textContent = agentName;
+            
+            // Hide start screen, show status bar and load level
+            elStart.classList.add('hidden');
+            elStatusBar.classList.remove('hidden');
+            
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevel >= levels.length) {
+                endGame();
+                return;
+            }
+
+            const level = levels[currentLevel];
+            
+            // Update Status Bar
+            document.getElementById('displayLevel').textContent = `${currentLevel + 1}/${levels.length}`;
+            
+            // Update Content
+            document.getElementById('levelTitle').textContent = level.year;
+            document.getElementById('heroName').textContent = level.hero;
+            document.getElementById('characterImage').src = level.image;
+            document.getElementById('storyText').innerHTML = level.story;
+
+            // Generate Choices
+            const choicesContainer = document.getElementById('choicesContainer');
+            choicesContainer.innerHTML = '';
+            
+            const btnColors = [
+                'from-pink-500 to-rose-600',
+                'from-indigo-500 to-blue-600',
+                'from-teal-500 to-emerald-600'
+            ];
+
+            level.choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-hover w-full bg-gradient-to-r ${btnColors[index % 3]} text-white font-bold py-3 px-4 rounded-xl text-left shadow-md flex items-center gap-3`;
+                btn.innerHTML = `<span class="bg-white/20 w-8 h-8 flex items-center justify-center rounded-lg shrink-0">${String.fromCharCode(65 + index)}</span> <span>${choice}</span>`;
+                btn.onclick = () => checkAnswer(index);
+                choicesContainer.appendChild(btn);
+            });
+
+            // Show Level Screen
+            elResult.classList.add('hidden');
+            elLevel.classList.remove('hidden');
+            
+            // Re-trigger animation
+            elLevel.classList.remove('fade-in');
+            void elLevel.offsetWidth; // trigger reflow
+            elLevel.classList.add('fade-in');
+        }
+
+        function checkAnswer(selectedIndex) {
+            const level = levels[currentLevel];
+            const isCorrect = selectedIndex === level.correctIndex;
+            
+            elLevel.classList.add('hidden');
+            elResult.classList.remove('hidden');
+
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultExplanation = document.getElementById('resultExplanation');
+            const rewardText = document.getElementById('rewardText');
+
+            if (isCorrect) {
+                score += 10;
+                document.getElementById('displayScore').textContent = score;
+                resultIcon.textContent = '🌟';
+                resultTitle.textContent = 'Tepat Sekali!';
+                resultTitle.className = 'text-3xl font-black mb-2 text-green-400';
+                resultExplanation.innerHTML = level.explanationCorrect;
+                rewardText.classList.remove('hidden');
+                
+                // Add minor celebration animation
+                resultIcon.classList.add('animate-bounce');
+                setTimeout(() => resultIcon.classList.remove('animate-bounce'), 2000);
+            } else {
+                resultIcon.textContent = '💡';
+                resultTitle.textContent = 'Wah, Hampir Benar!';
+                resultTitle.className = 'text-3xl font-black mb-2 text-yellow-400';
+                resultExplanation.innerHTML = level.explanationWrong;
+                rewardText.classList.add('hidden');
+            }
+
+            // Update button text for the last level
+            if (currentLevel === levels.length - 1) {
+                document.getElementById('nextBtn').innerHTML = 'LIHAT HASIL AKHIR 🏆';
+            } else {
+                document.getElementById('nextBtn').innerHTML = 'LANJUTKAN MISI ➡️';
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            loadLevel();
+        }
+
+        function endGame() {
+            elLevel.classList.add('hidden');
+            elResult.classList.add('hidden');
+            elStatusBar.classList.add('hidden');
+            elEnd.classList.remove('hidden');
+
+            document.getElementById('finalScore').textContent = score;
+            
+            const endMsg = document.getElementById('endMessage');
+            if (score === 150) {
+                endMsg.textContent = "Sempurna! Kamu adalah ahli sejarah Nusantara sejati. Bangsa ini bangga padamu!";
+            } else if (score >= 80) {
+                endMsg.textContent = "Kerja bagus! Kamu telah banyak belajar dari perjuangan para pahlawan kita.";
+            } else {
+                endMsg.textContent = "Petualangan yang seru! Jangan menyerah, pahlawan sejati selalu belajar dari kesalahan.";
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            currentLevel = 0;
+            document.getElementById('displayScore').textContent = score;
+            
+            elEnd.classList.add('hidden');
+            elStart.classList.remove('hidden');
+            document.getElementById('agentInput').value = '';
+        }
+    </script>
+</body>
+</html>
